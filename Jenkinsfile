@@ -3,7 +3,7 @@ pipeline {
     agent any
     
     environment {
-       IMAGE_NAME = 'nidhi460/jenkins-demo'
+       IMAGE_NAME = 'nidhi460/devops-app'
        IMAGE_TAG = "build-${BUILD_NUMBER}"
      }
     
@@ -19,41 +19,73 @@ pipeline {
        stage('Build') {
           steps {
             echo 'Building Application...'
-            sh 'ls -la'
+           
        }
   }
  
        stage('Test') {
          steps {
-            echo 'Running automated tests...'
-            sh './test.sh'
+            echo 'Running tests...'
+            sh 'test -f index.html'
 
        }
   }
 
-      stage('Package') {
-         steps {
-            echo 'Packaging Application...'
-            sh 'tar -czf website-${BUILD_NUMBER}.tar.gz index.html Dockerfile'
-      }
-  }
     
       stage('Docker Build') {
           steps {
-             echo 'Building Docker Image...'
-             sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG}'
+             sh '''
+             'docker build -t {DOCKER_IMAGE}:${DOCKER_TAG}'
+             '''
       }
   }
+     stage('Docker Push') {
+         steps {
+           sh '''
+           docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+           '''
+     }
+  }
+       
+     stage('Deploy'){
+         steps {
+           sh '''
+           kubectl set image deployment/devops-app \
+           web=${DOCKER_IMAGE}:${DOCKER_TAG}
+           '''
+     }
+  }
+      
+    stage('Verify') {
+       steps {
+          sh '''
+          kubectl rollout status deployments/devops-app
+          kubectl get pods
+          '''
+      }
+   }
+ }
+
+
+
+
+
+
+
+
+
+
+
 
       stage('Docker Push') {
           steps {
-             echo 'Pushing Docker image to Docker Hub...'
+             
  
              withCredentials([
                usernamePassword(
-               credentialsId: 'dockerhub-credentials',
-               usernameVariable: 'nidhi460',
-               passwordVariable: 'nidhi@1234'
+               credentialsId: 'dockerhub',
+               usernameVariable: 'DOCKER_USERNAME',
+               passwordVariable: 'DOCKER_PASSWORD'
            )
         ]) {
 
