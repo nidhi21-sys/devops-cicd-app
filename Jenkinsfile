@@ -57,7 +57,9 @@ pipeline {
             steps {
                 sh '''
                 kubectl set image deployment/devops-app \
-                web=${IMAGE_NAME}:${IMAGE_TAG}
+                web=${IMAGE_NAME}:${IMAGE_TAG} -n devops
+                '''
+
                 -n devops
             }
         }
