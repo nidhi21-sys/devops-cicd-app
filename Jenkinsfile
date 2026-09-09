@@ -67,7 +67,7 @@ pipeline {
             steps {
                 sh '''
                 kubectl rollout status deployments/devops-app
-                kubectl get pods
+                kubectl get pods -n devops
                 '''
             }
         }
