@@ -53,15 +53,15 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                sh '''
-                kubectl set image deployment/devops-app \
-                web=${IMAGE_NAME}:${IMAGE_TAG} -n devops
-                '''
-
-            }
-        }
+           stage('Deploy') {
+       steps {
+           withCredentials([file(credentialsId: 'kubeconfig-devops', variable: 'KUBECONFIG')]) {
+               sh '''
+                   kubectl set image deployment/devops-app web=${IMAGE_NAME}:${IMAGE_TAG} -n devops
+               '''
+           }
+       }
+   }
 
         stage('Verify') {
             steps {
