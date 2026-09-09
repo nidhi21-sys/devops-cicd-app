@@ -60,7 +60,6 @@ pipeline {
                 web=${IMAGE_NAME}:${IMAGE_TAG} -n devops
                 '''
 
-                -n devops
             }
         }
 
