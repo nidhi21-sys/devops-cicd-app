@@ -66,7 +66,7 @@ pipeline {
         stage('Verify') {
             steps {
                 sh '''
-                kubectl rollout status deployments/devops-app
+                kubectl rollout status deployments/devops-app -n devops
                 '''
             }
         }
