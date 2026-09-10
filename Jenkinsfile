@@ -53,23 +53,23 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-    steps {
-        sh '''
-            kubectl set image deployment/devops-app web=${DOCKER_IMAGE}:${DOCKER_TAG} -n devops
-        '''
-    }
-}
-            
-
-        stage('Verify') {
+         stage('Deploy') {
             steps {
                 sh '''
-                    kubectl rollout status deployment/devops-app -n devops
+                kubectl set image deployment/devops-app \
+                web=${DOCKER_IMAGE}:${DOCKER_TAG}
                 '''
             }
         }
 
+        stage('Verify') {
+            steps {
+                sh '''
+                kubectl rollout status deployment/devops-app
+                kubectl get pods
+                '''
+            }
+        }
     }
 
     post {
