@@ -60,8 +60,6 @@ stage('Deploy') {
         '''
     }
 }
-
-<<<<<<< Updated upstream
         stage('Verify') {
             steps {
                 sh '''
@@ -70,7 +68,7 @@ stage('Deploy') {
                 '''
             }
         }
-=======
+
        }
   }
 
