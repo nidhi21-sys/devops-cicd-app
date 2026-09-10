@@ -3,8 +3,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'nidhi460/devops-app'
-        DOCKER_TAG  = "build-${BUILD_NUMBER}"
+        IMAGE_NAME = 'nidhi460/devops-app'
+        IMAGE_TAG  = "build-${BUILD_NUMBER}"
     }
 
     stages {
@@ -32,7 +32,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh '''
-                docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
                 '''
             }
         }
@@ -48,7 +48,7 @@ pipeline {
                 ]) {
                     sh '''
                     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER USERNAME" --password-stdin
-                    docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
                     '''
                 }
             }
@@ -58,7 +58,7 @@ pipeline {
             steps {
                 sh '''
                 kubectl set image deployment/devops-app \
-                web=${DOCKER_IMAGE}:${DOCKER_TAG}
+                web=${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
