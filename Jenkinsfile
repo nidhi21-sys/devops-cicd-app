@@ -53,14 +53,13 @@ pipeline {
             }
         }
 
-         stage('Deploy') {
-            steps {
-                sh '''
-                kubectl set image deployment/devops-app web=nginx:latest
-                web=${DOCKER_IMAGE}:${DOCKER_TAG}
-                '''
-            }
-        }
+        stage('Deploy') {
+    steps {
+        sh '''
+            kubectl set image deployment/devops-app web=${DOCKER_IMAGE}:${DOCKER_TAG} -n devops
+        '''
+    }
+}
             
 
         stage('Verify') {
