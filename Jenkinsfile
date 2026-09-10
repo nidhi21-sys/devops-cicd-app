@@ -61,6 +61,7 @@ stage('Deploy') {
     }
 }
 
+<<<<<<< Updated upstream
         stage('Verify') {
             steps {
                 sh '''
@@ -69,6 +70,62 @@ stage('Deploy') {
                 '''
             }
         }
+=======
+       }
+  }
+
+    
+      stage('Docker Build') {
+          steps {
+             sh '''
+             'docker build -t {DOCKER_IMAGE}:${DOCKER_TAG}'
+             '''
+      }
+  }
+     stage('Docker Push') {
+         steps {
+           sh '''
+           docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+           '''
+     }
+  }
+       
+     stage('Deploy'){
+         steps {
+           sh '''
+           kubectl set image deployment/devops-app \
+           web=${DOCKER_IMAGE}:${DOCKER_TAG}
+           '''
+     }
+  }
+      
+    stage('Verify') {
+       steps {
+          sh '''
+          kubectl rollout status deployments/devops-app
+          kubectl get pods
+          '''
+      }
+     
+  stage('Docker Push') {
+          steps {
+             
+ 
+             withCredentials([
+               usernamePassword(
+               credentialsId: 'dockerhub',
+               usernameVariable: 'DOCKER_USERNAME',
+               passwordVariable: 'DOCKER_PASSWORD'
+           )
+        ]) {
+
+           sh '''
+             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+             docker push ${IMAGE_NAME}:${IMAGE_TAG}
+             docker lo            '''
+          }
+       }
+>>>>>>> Stashed changes
     }
 
     post {
