@@ -4,7 +4,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'nidhi460/devops-app'
-        IMAGE_TAG = "build-${BUILD_NUMBER}"
+        IMAGE_TAG  = "build-${BUILD_NUMBER}"
     }
 
     stages {
@@ -36,7 +36,9 @@ pipeline {
        }
         stage('Docker Build') {
             steps {
-                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+                sh '''
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                '''
             }
         }
         stage('Docker Image Scan') {
@@ -82,10 +84,15 @@ pipeline {
           
           
 
-ssss
+              
+            
+           
+ 
+   
+     
 
   
  
   
       
-   
+  
