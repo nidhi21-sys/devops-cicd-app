@@ -71,9 +71,9 @@ pipeline {
          steps {
             sh 'curl -f http://localost'
            }
-    }
-
-
+        }
+     }
+  }
 
  
 
