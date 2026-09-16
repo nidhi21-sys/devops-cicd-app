@@ -28,14 +28,23 @@ pipeline {
                 sh 'test -f index.html'
             }
         }
-
+        stage('Security Check') {
+            steps {
+              echo 'Performing basic security check...'
+                sh 'test -f Dockerfile'
+           }
+       }
         stage('Docker Build') {
             steps {
                 sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
             }
         }
-
-        stage('Docker Push') {
+        stage('Docker Image Scan') {
+            steps {
+               sh "trivy image ${IMAGE_NAME}:${IMAGE_TAG}"
+            }
+      }
+       stage('Docker Push') {
             steps {
                 withCredentials([
                     usernamePassword(
@@ -44,96 +53,39 @@ pipeline {
                         passwordVariable: 'DOCKER_PASSWORD'
                     )
                 ]) {
-                    sh '''
-                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                                           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         docker logout
-                    '''
-                }
-            }
-        }
-stage('Deploy') {
-    steps {
-        sh '''
-        kubectl set image deployment/devops-app \
-        web=${IMAGE_NAME}:${IMAGE_TAG}
-        '''
-    }
-}
-
-<<<<<<< Updated upstream
-        stage('Verify') {
-            steps {
-                sh '''
-                kubectl rollout status deployment/devops-app
-                kubectl get pods
-                '''
-            }
-        }
-=======
-       }
-  }
-
-    
-      stage('Docker Build') {
-          steps {
-             sh '''
-             'docker build -t {DOCKER_IMAGE}:${DOCKER_TAG}'
-             '''
-      }
-  }
-     stage('Docker Push') {
-         steps {
-           sh '''
-           docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
-           '''
-     }
-  }
-       
-     stage('Deploy'){
-         steps {
-           sh '''
-           kubectl set image deployment/devops-app \
-           web=${DOCKER_IMAGE}:${DOCKER_TAG}
-           '''
-     }
-  }
-      
-    stage('Verify') {
-       steps {
-          sh '''
-          kubectl rollout status deployments/devops-app
-          kubectl get pods
-          '''
-      }
+                  }
      
-  stage('Docker Push') {
-          steps {
+       }
+        }
+       stage('Deploy') {
+           steps {
+             echo 'Deploying application...'
+           }
+     }
+      stage('Verify') {
+         steps {
+            sh 'curl -f http://localost'
+           }
+    }
+
+
+
+ 
+
+ 
+    
              
  
-             withCredentials([
-               usernamePassword(
-               credentialsId: 'dockerhub',
-               usernameVariable: 'DOCKER_USERNAME',
-               passwordVariable: 'DOCKER_PASSWORD'
-           )
-        ]) {
+          
+          
 
-           sh '''
-             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-             docker push ${IMAGE_NAME}:${IMAGE_TAG}
-             docker lo            '''
-          }
-       }
->>>>>>> Stashed changes
-    }
+ssss
 
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
-    }
-}
+  
+ 
+  
+      
+   
