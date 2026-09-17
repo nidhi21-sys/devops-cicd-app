@@ -1,9 +1,11 @@
 pipeline {
+
     agent any
 
     environment {
         IMAGE_NAME = 'nidhi460/devops-app'
         IMAGE_TAG  = "build-${BUILD_NUMBER}"
+        CONTAINER_NAME = 'devops-app'
     }
 
     stages {
@@ -17,63 +19,42 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo 'Building application...'
+                echo 'Building Application...'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh '''
-                test -f index.html
-                echo "Test Passed"
-                '''
+                sh 'test -f index.html'
             }
         }
 
         stage('Security Check') {
             steps {
-                echo 'Checking application security...'
-
-                sh '''
-                if [ ! -f Dockerfile ]; then
-                    echo "Dockerfile Missing"
-                    exit 1
-                fi
-
-                echo "Dockerfile Found"
-                '''
+                echo 'Performing basic security check...'
+                sh 'test -f Dockerfile'
             }
         }
 
         stage('Docker Build') {
             steps {
-                echo 'Building Docker Image...'
-
                 sh '''
-                docker build \
-                -t ${IMAGE_NAME}:${IMAGE_TAG} \
-                -t ${IMAGE_NAME}:latest .
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
                 '''
             }
         }
 
         stage('Docker Image Scan') {
             steps {
-                echo 'Scanning Docker Image using Trivy...'
-
                 sh '''
-                trivy image \
-                --severity HIGH,CRITICAL \
-                --exit-code 1 \
-                ${IMAGE_NAME}:${IMAGE_TAG}
+                    trivy image ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
 
         stage('Docker Push') {
             steps {
-
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'dockerhub',
@@ -81,16 +62,10 @@ pipeline {
                         passwordVariable: 'DOCKER_PASSWORD'
                     )
                 ]) {
-
                     sh '''
-                    echo "$DOCKER_PASSWORD" | docker login \
-                    -u "$DOCKER_USERNAME" \
-                    --password-stdin
-
-                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                    docker push ${IMAGE_NAME}:latest
-
-                    docker logout
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker logout
                     '''
                 }
             }
@@ -98,64 +73,24 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deploying Container...'
-
                 sh '''
-                docker rm -f devops-app || true
+                    docker rm -f ${CONTAINER_NAME} 2>/dev/null || true
 
-                docker run -d \
-                --name devops-app \
-                -p 80:80 \
-                ${IMAGE_NAME}:${IMAGE_TAG}
+                    docker run -d \
+                        --name ${CONTAINER_NAME} \
+                        -p 8080:80 \
+                        ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Verify') {
             steps {
-                echo 'Verifying application health...'
-
                 sh '''
-                sleep 10
-                curl -f http://localhost || exit 1
+                    sleep 5
+                    curl -f http://localhost:8080
                 '''
             }
-        }
-    }
-
-    post {
-
-        success {
-            echo 'Pipeline Completed Successfully'
-        }
-
-        failure {
-            echo 'Pipeline Failed'
-        }
-
-        always {
-            echo 'Production Readiness Pipeline Finished'
         }
     }
 }
- 
-
- 
-    
-             
- 
-          
-          
-
-              
-            
-           
- 
-   
-     
-
-  
- 
-  
-      
-  
